@@ -1,0 +1,27 @@
+---
+- name: Install dependencies
+  ansible.builtin.package:
+    name:
+      - git
+      - ca-certificates
+    state: present
+  become: true
+
+- name: Git Clone CTFd
+  ansible.builtin.git:
+    repo: https://github.com/CTFd/CTFd
+    dest: /opt/CTFd
+    depth: 1
+    version: master
+  become: true
+
+- name: Adjust CTFd Docker Compose file
+  ansible.builtin.lineinfile:
+    path: /opt/CTFd/docker-compose.yml
+    regexp: '^version:.*'
+    state: absent
+
+- name: Start CTFd with Docker Compose
+  community.docker.docker_compose_v2:
+    project_src: /opt/CTFd
+    state: present
